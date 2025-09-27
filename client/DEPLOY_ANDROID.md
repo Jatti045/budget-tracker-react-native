@@ -49,7 +49,7 @@ eas build -p android --profile production
 ```bash
 # in client folder
 # ensure you have the service account json at ./keys/play-service-account.json
-eas submit -p android --profile production --key ./keys/play-service-account.json
+eas submit -p android --profile production --service-account ./keys/play-service-account.json
 ```
 
 - Option B: Download the AAB from EAS build dashboard and upload manually to Play Console -> Release -> Internal test -> Create release -> Upload AAB.
@@ -65,6 +65,13 @@ Security & notes
 - Use `eas secret:create` to store secrets in EAS and reference them via `process.env` in builds.
 - Add `client/keys/` to your repo `.gitignore` (this repo already includes that entry at root `.gitignore`).
 - Alternatively, use `eas secret:create` to store environment secrets and avoid placing them on disk.
+
+CI / GitHub Actions notes
+- To run the build & submit from CI, add these repository Secrets in GitHub Settings -> Secrets -> Actions:
+	- `EXPO_TOKEN` — an Expo access token (create via `eas login` then `eas token:create`)
+	- `PLAY_SERVICE_ACCOUNT_JSON` — the full contents of the Play service account JSON (base64 or raw JSON). The workflow will write it to `client/keys/play-service-account.json` at runtime.
+
+The repository already includes a GitHub Actions workflow at `.github/workflows/eas-build.yml` that will run on push to `main` and can also be triggered manually.
 
 Troubleshooting
 - If the build fails, check the build logs on the EAS dashboard and run `eas build -p android --profile production --local` for local debugging.
