@@ -6,7 +6,16 @@ import logger from "../utils/logger";
 // Build a configured arcjet middleware. This returns an Express-compatible
 // middleware. If Arcjet is not configured, we return a no-op middleware.
 export function createArcjetMiddleware() {
-  const MODE = ((ENV.ARCJET_MODE as string) || "LIVE").toUpperCase(); // LIVE | DRY_RUN | OFF
+  // Normalize and validate mode. Accept only LIVE or DRY_RUN. Any other
+  // value (including undefined) will be treated as OFF to avoid crashing
+  // when an invalid mode is supplied in the environment.
+  let MODE = ((ENV.ARCJET_MODE as string) || "OFF").toUpperCase(); // LIVE | DRY_RUN | OFF
+  if (MODE !== "LIVE" && MODE !== "DRY_RUN" && MODE !== "OFF") {
+    logger.warn(
+      `Invalid ARCJET_MODE='${ENV.ARCJET_MODE}' - treating as OFF (no Arcjet).`
+    );
+    MODE = "OFF";
+  }
 
   if (!ENV.ARCJET_KEY || MODE === "OFF") {
     if (!ENV.ARCJET_KEY) {
